@@ -1,0 +1,15 @@
+# Copy to ~/.config/ha-macos-agents/config and edit.
+
+# Base URL of your Home Assistant instance.
+HA_URL=https://homeassistant.example.com
+
+# Login Keychain service holding a long-lived access token (see `make token`).
+HA_KEYCHAIN_SERVICE=ha-macos-agents
+
+# ha-activity: input_datetime helper (date and time) for the last input time.
+ACTIVITY_ENTITY=input_datetime.mac_last_input
+
+# ha-camera: input_boolean helper mirroring "a camera is in use".
+CAMERA_ENTITY=input_boolean.mac_camera_in_use
+# Re-send the camera state at least this often, even when unchanged.
+RESYNC_MINUTES=10

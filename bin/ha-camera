@@ -1,0 +1,23 @@
+#!/bin/bash
+# Mirror "is any camera in use" to an input_boolean helper.
+# Runs every few seconds but only calls Home Assistant when the state changes,
+# or when the last successful report is older than RESYNC_MINUTES (so a value
+# changed in Home Assistant, or lost while it was down, is corrected).
+# shellcheck source=lib/ha.sh
+source "$(dirname "$0")/../lib/ha.sh"
+require_var CAMERA_ENTITY
+
+detector="$(dirname "$0")/../build/camera-in-use"
+[[ -x "$detector" ]] || die "missing $detector (run: make build)"
+
+state=$("$detector")
+state_file="$HA_AGENTS_STATE_DIR/camera"
+mkdir -p "$HA_AGENTS_STATE_DIR"
+
+if [[ "$(cat "$state_file" 2>/dev/null)" == "$state" ]] \
+    && [[ -z "$(find "$state_file" -mmin "+${RESYNC_MINUTES:-10}")" ]]; then
+    exit 0
+fi
+
+ha_call input_boolean "turn_$state" "{\"entity_id\": \"$CAMERA_ENTITY\"}"
+echo "$state" > "$state_file"

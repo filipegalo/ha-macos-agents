@@ -1,0 +1,13 @@
+#!/bin/bash
+# Report the time of this Mac's last keyboard or mouse input to an
+# input_datetime helper. Runs every minute; Home Assistant decides what counts
+# as idle. A sleeping Mac stops reporting, so the value simply ages.
+# shellcheck source=lib/ha.sh
+source "$(dirname "$0")/../lib/ha.sh"
+require_var ACTIVITY_ENTITY
+
+idle=$(ioreg -c IOHIDSystem -d 4 | awk '/HIDIdleTime/ {print int($NF / 1000000000); exit}')
+[[ -n "$idle" ]] || die "cannot read HIDIdleTime"
+
+ha_call input_datetime set_datetime \
+    "{\"entity_id\": \"$ACTIVITY_ENTITY\", \"timestamp\": $(( $(date +%s) - idle ))}"
