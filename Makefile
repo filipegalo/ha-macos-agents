@@ -32,7 +32,8 @@ token: ## Store a Home Assistant access token in the login Keychain
 	security add-generic-password -U -a "$$USER" -s "$$service" -w "$$t" \
 	&& echo "stored in Keychain service '$$service'"
 
-install: build ## Install and start the launchd agents in AGENTS
+# Only the camera agent needs the native helper, and with it swiftc.
+install: $(if $(filter camera:%,$(AGENTS)),build) ## Install and start the launchd agents in AGENTS
 	@[[ -r $(CONFIG) ]] || { echo "run 'make config' first" >&2; exit 1; }
 	@mkdir -p $(LAUNCHD_DIR) $(LOG_DIR)
 	@for spec in $(AGENTS); do \

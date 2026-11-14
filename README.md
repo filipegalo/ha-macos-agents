@@ -11,6 +11,19 @@ installing the Home Assistant Companion app is not an option.
 | `ha-activity` | 60 s | Time of the last keyboard or mouse input to an `input_datetime` | Keep something on while you are at the computer, and turn it off a while after you stop |
 | `ha-camera` | 5 s | Whether any camera is in use to an `input_boolean` | An "on a call" light, muting speakers, do-not-disturb |
 
+Each agent is independent: install only the ones you want, and set only their
+entities in the config.
+
+```bash
+make install AGENTS=activity:60            # activity only
+make install AGENTS=camera:5               # camera only
+make install AGENTS="activity:120 camera:5" # both, activity every 2 minutes
+```
+
+The number is how often launchd runs the agent, in seconds. Use the same
+`AGENTS` value with `make uninstall` and `make status`; leave it out to act on
+every agent.
+
 ## How it behaves
 
 - **Failure means stale, not stuck.** A Mac that sleeps, leaves the network or
@@ -25,8 +38,8 @@ installing the Home Assistant Companion app is not an option.
 
 ## Requirements
 
-- macOS with the Xcode Command Line Tools (`xcode-select --install`) for
-  `swiftc`.
+- macOS. The camera agent also needs the Xcode Command Line Tools
+  (`xcode-select --install`) to compile its helper with `swiftc`.
 - Home Assistant reachable from the Mac over HTTPS.
 
 ## Setup
@@ -54,11 +67,10 @@ installing the Home Assistant Companion app is not an option.
    ```bash
    make config        # creates ~/.config/ha-macos-agents/config; edit it
    make token         # prompts for the token and stores it in the Keychain
-   make install       # compiles the camera helper and starts both agents
+   make install       # starts every agent; add AGENTS=... to pick (see above)
    make status
    ```
 
-   To install only some agents, set `AGENTS`: `make install AGENTS=activity:60`.
    The installed plists point at this checkout, so keep it where it is or run
    `make install` again after moving it.
 
